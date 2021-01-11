@@ -32,6 +32,7 @@ public final class PortalsManager implements PortalsLibrary {
     @Override
     public @NotNull Optional<Portal> getPortalAt(@NotNull Location location) {
         return portals.values().stream()
+                .filter(Portal::isAvailable)
                 .filter(portal -> portal.isInside(location))
                 .filter(portal -> location.getWorld().equals(portal.getWorld()))
                 .findFirst();

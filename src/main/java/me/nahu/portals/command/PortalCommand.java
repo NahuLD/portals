@@ -1,10 +1,7 @@
 package me.nahu.portals.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.*;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 import me.nahu.portals.api.PortalsLibrary;
@@ -19,6 +16,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -54,6 +52,25 @@ public class PortalCommand extends BaseCommand {
                 .color(ChatColor.YELLOW)
                 .create()
         );
+    }
+
+    @Subcommand("consoleedit|ce")
+    @CommandCompletion("@portals true|false")
+    public void edit(
+            @NotNull CommandSender commandSender,
+            @NotNull String id,
+            boolean availablility,
+            @Split(" ") String[] command
+    ) {
+        Optional<Portal> found = portalsLibrary.getPortalById(id);
+        if (!found.isPresent()) {
+            commandSender.sendMessage(ChatColor.RED + "No portal found with that ID!");
+            return;
+        }
+        Portal portal = found.get();
+        portal.setAvailability(availablility);
+        if (command != null) portal.setCommand(String.join(" ", command));
+        commandSender.sendMessage(ChatColor.GREEN + "Successfully updated portal: " + ChatColor.YELLOW + portal.getId());
     }
 
     @Subcommand("edit")
