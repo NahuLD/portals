@@ -5,7 +5,6 @@ import me.nahu.portals.api.entities.Portal;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public final class BasicPortal implements Portal {
-    private final String id;
+    private final String name;
 
     private World world;
 
@@ -28,37 +27,37 @@ public final class BasicPortal implements Portal {
 
     private String command;
 
-    private boolean available;
+    private boolean consoleCommand;
 
     public BasicPortal(
-            @NotNull String id,
+            @NotNull String name,
             @NotNull World world,
             @NotNull Vector maxPoint,
             @NotNull Vector minPoint,
-            boolean available
+            boolean consoleCommand
     ) {
-        this(id, world, maxPoint, minPoint, null, available);
+        this(name, world, maxPoint, minPoint, null, consoleCommand);
     }
 
     public BasicPortal(
-            @NotNull String id,
+            @NotNull String name,
             @NotNull World world,
             @NotNull Vector maxPoint,
             @NotNull Vector minPoint,
             @Nullable String command,
-            boolean available
+            boolean consoleCommand
     ) {
-        this.id = id;
+        this.name = name;
         this.world = world;
         this.maxPoint = maxPoint;
         this.minPoint = minPoint;
         this.command = command;
-        this.available = available;
+        this.consoleCommand = consoleCommand;
     }
 
     @Override
-    public @NotNull String getId() {
-        return id;
+    public @NotNull String getName() {
+        return name;
     }
 
     @Override
@@ -104,13 +103,13 @@ public final class BasicPortal implements Portal {
     }
 
     @Override
-    public boolean isAvailable() {
-        return available;
+    public boolean isConsoleCommand() {
+        return consoleCommand;
     }
 
     @Override
-    public void setAvailability(boolean availability) {
-        this.available = availability;
+    public void setConsoleCommand(boolean consoleCommand) {
+        this.consoleCommand = consoleCommand;
     }
 
     @Override
@@ -126,7 +125,7 @@ public final class BasicPortal implements Portal {
     @Override
     public void invokeCommand(@NotNull Player player) {
         getCommand().ifPresent(command -> Bukkit.getServer().dispatchCommand(
-            Bukkit.getConsoleSender(),
+            consoleCommand ? Bukkit.getConsoleSender() : player,
             command.replace("%player%", player.getName())
         ));
     }
@@ -134,9 +133,9 @@ public final class BasicPortal implements Portal {
     @Override
     public Map<String, Object> serialize() {
         return ImmutableMap.<String, Object>builder()
-                .put("id", id)
+                .put("name", name)
                 .put("world", world.getUID().toString())
-                .put("available", available)
+                .put("console-sender", consoleCommand)
                 .put("max", maxPoint)
                 .put("min", minPoint)
                 .put("command", getCommand().orElse("none"))
@@ -153,7 +152,7 @@ public final class BasicPortal implements Portal {
         String command = (String) args.get("command");
         Vector max = (Vector) args.get("max");
         Vector min = (Vector) args.get("min");
-        boolean available = (boolean) args.get("available");
-        return new BasicPortal(id, world, max, min, (command != null && command.equals("none")) ? null : command, available);
+        boolean consolesender = (boolean) args.get("console-sender");
+        return new BasicPortal(id, world, max, min, (command != null && command.equals("none")) ? null : command, consolesender);
     }
 }

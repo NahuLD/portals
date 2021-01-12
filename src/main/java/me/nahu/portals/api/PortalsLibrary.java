@@ -46,21 +46,25 @@ public interface PortalsLibrary {
 
     /**
      * Create a new portal.
+     * @param name Name of the portal.
      * @param world World this portal is contained in.
      * @param maxPoint Maximum point.
      * @param minPoint Minimum point.
      * @return New Portal with a randomly generated id.
      */
-    Portal createPortal(@NotNull World world, @NotNull Vector maxPoint, @NotNull Vector minPoint);
+    @NotNull
+    Portal createPortal(@NotNull String name, @NotNull World world, @NotNull Vector maxPoint, @NotNull Vector minPoint);
 
     /**
      * Create a new portal based off two locations. Both must be contained in the same world.
+     * @param name Name of the portal.
      * @param maxLocation Maximum location point.
      * @param minLocation Minimum location point.
      * @return New portal with a randomly generated id.
      */
-    default Portal createPortal(@NotNull Location maxLocation, @NotNull Location minLocation) {
+    @NotNull
+    default Portal createPortal(@NotNull String name, @NotNull Location maxLocation, @NotNull Location minLocation) {
         Preconditions.checkArgument(maxLocation.getWorld().equals(minLocation.getWorld()), "both locations must be on the same world");
-        return createPortal(maxLocation.getWorld(), maxLocation.toVector(), minLocation.toVector());
+        return createPortal(name, maxLocation.getWorld(), maxLocation.toVector(), minLocation.toVector());
     }
 }

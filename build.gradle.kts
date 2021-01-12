@@ -58,10 +58,19 @@ dependencies {
     compileOnly("com.sk89q.worldedit:worldedit-bukkit:6.1.5")
     implementation("co.aikar:acf-bukkit:0.5.0-SNAPSHOT")
     implementation("me.tom.sparse:ChatMenuAPI:1.1.2_jdk8_spgt1.8.8")
+    implementation("de.themoep:minedown:1.6.2-SNAPSHOT")
 }
 
 tasks.withType<JavaCompile> {
     options.compilerArgs.add("-parameters")
+}
+
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    arrayOf(
+        "co.aikar.commands",
+        "me.tom.sparse.spigot.chat.menu",
+        "de.themoep.minedown"
+    ).forEach { relocate(it, "$group.shadow.$it") }
 }
 
 bukkit {

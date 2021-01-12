@@ -1,7 +1,6 @@
 package me.nahu.portals;
 
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import me.nahu.portals.api.PortalsLibrary;
@@ -10,7 +9,6 @@ import me.nahu.portals.portal.BasicPortal;
 import me.nahu.portals.utils.Utilities;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -21,10 +19,13 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class PortalsManager implements PortalsLibrary {
-    private final YamlConfiguration configuration;
     private final Map<String, Portal> portals;
 
-    public PortalsManager(@NotNull YamlConfiguration configuration) {
+    private final YamlConfiguration configuration;
+    private final File configurationFile;
+
+    public PortalsManager(@NotNull YamlConfiguration configuration, @NotNull File configurationFile) {
+        this.configurationFile = configurationFile;
         this.configuration = configuration;
         this.portals = loadPortals();
     }
@@ -32,7 +33,6 @@ public final class PortalsManager implements PortalsLibrary {
     @Override
     public @NotNull Optional<Portal> getPortalAt(@NotNull Location location) {
         return portals.values().stream()
-                .filter(Portal::isAvailable)
                 .filter(portal -> portal.isInside(location))
                 .filter(portal -> location.getWorld().equals(portal.getWorld()))
                 .findFirst();
@@ -54,15 +54,26 @@ public final class PortalsManager implements PortalsLibrary {
     }
 
     @Override
-    public Portal createPortal(@NotNull World world, @NotNull Vector maxPoint, @NotNull Vector minPoint) {
-        Portal portal = new BasicPortal(Utilities.getRandomId(), world, maxPoint, minPoint, false);
-        portals.put(portal.getId(), portal);
+    public @NotNull Portal createPortal(@NotNull String name, @NotNull World world, @NotNull Vector maxPoint, @NotNull Vector minPoint) {
+        Portal portal = new BasicPortal(name, world, maxPoint, minPoint, false);
+        portals.put(portal.getName(), portal);
         return portal;
     }
 
-    public void savePortals(@NotNull File configurationFile) throws IOException {
-        getPortals().forEach(portal -> configuration.set(portal.getId(), portal));
-        configuration.save(configurationFile);
+    public void savePortals() throws IOException {
+        getPortals().forEach(portal -> configuration.set(portal.getName(), portal));
+        configuration.save(this.configurationFile);
+    }
+
+    public void savePortal(@NotNull Portal portal) {
+        configuration.set(portal.getName(), portal);
+        Utilities.runTaskAsynchronously(() -> {
+            try {
+                configuration.save(configurationFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @NotNull

@@ -1,30 +1,18 @@
 package me.nahu.portals.utils;
 
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
+import me.nahu.portals.PortalsPlugin;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class Utilities {
-    private static final char[] UPPERCASE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-    private static final Random UTILITY_RANDOM = new Random();
+    private static final Plugin PLUGIN = PortalsPlugin.getPlugin(PortalsPlugin.class);
 
-    /**
-     * Get a random ID of 3 character length.
-     * @return Random ID.
-     */
-    public static String getRandomId() {
-        return getRandomId(3);
-    }
-
-    /**
-     * Get a random id with a specified length.
-     * @param length Length of the id you want.
-     * @return Random ID.
-     */
-    public static String getRandomId(int length) {
-        StringBuilder builder = new StringBuilder();
-        for (int index = 0; index < length; index++) {
-            builder.append(UPPERCASE_ALPHABET[UTILITY_RANDOM.nextInt(UPPERCASE_ALPHABET.length)]);
-        }
-        return builder.toString();
+    public static void runTaskAsynchronously(Runnable runnable) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                runnable.run();
+            }
+        }.runTaskAsynchronously(PLUGIN);
     }
 }

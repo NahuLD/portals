@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,7 +20,7 @@ public interface Portal extends ConfigurationSerializable {
      * @return Portal ID.
      */
     @NotNull
-    String getId();
+    String getName();
 
     /**
      * Get the world this Portal is located in.
@@ -77,16 +76,16 @@ public interface Portal extends ConfigurationSerializable {
     void setMinPoint(@NotNull Vector minPoint);
 
     /**
-     * Check whether this portal is available.
+     * Check whether this portals' command is sent by the console.
      * @return {@link Boolean} available.
      */
-    boolean isAvailable();
+    boolean isConsoleCommand();
 
     /**
-     * Set the availability for this Portal.
-     * @param availability New availability.
+     * Set true if you want this command to be sent by the console.
+     * @param consoleCommand New value.
      */
-    void setAvailability(boolean availability);
+    void setConsoleCommand(boolean consoleCommand);
 
     /**
      * Get the command that will be run once it's activated.

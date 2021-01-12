@@ -8,7 +8,6 @@ import me.nahu.portals.listeners.PlayerListener;
 import me.nahu.portals.portal.BasicPortal;
 import me.tom.sparse.spigot.chat.menu.ChatMenuAPI;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,25 +24,27 @@ public class PortalsPlugin extends JavaPlugin {
     private PortalsManager portalsManager;
     private BukkitCommandManager commandManager;
 
-    private File portalsFile;
-
     @Override
     public void onEnable() {
         WorldEditPlugin worldEditPlugin = (WorldEditPlugin) getServer().getPluginManager().getPlugin("WorldEdit");
         ChatMenuAPI.init(this);
 
         saveResource("portals.yml", false);
+        saveResource("config.yml", false);
 
-        portalsFile = new File(getDataFolder(), "portals.yml");
-        portalsManager = new PortalsManager(YamlConfiguration.loadConfiguration(portalsFile));
+        File portalsFile = new File(getDataFolder(), "portals.yml");
+        portalsManager = new PortalsManager(YamlConfiguration.loadConfiguration(portalsFile), portalsFile);
 
         commandManager = new BukkitCommandManager(this);
         commandManager.getCommandCompletions().registerAsyncCompletion(
                 "portals",
-                context -> portalsManager.getPortals().stream().map(Portal::getId).collect(Collectors.toSet())
+                context -> portalsManager.getPortals().stream()
+                        .map(Portal::getName)
+                        .filter(name -> name.startsWith(context.getInput()))
+                        .collect(Collectors.toSet())
         );
 
-        commandManager.registerCommand(new PortalCommand(portalsManager, worldEditPlugin));
+        commandManager.registerCommand(new PortalCommand(portalsManager, worldEditPlugin, getConfig()));
         getServer().getPluginManager().registerEvents(new PlayerListener(portalsManager), this);
     }
 
@@ -53,7 +54,7 @@ public class PortalsPlugin extends JavaPlugin {
         commandManager.unregisterCommands();
         ChatMenuAPI.disable();
         try {
-            portalsManager.savePortals(portalsFile);
+            portalsManager.savePortals();
         } catch (IOException e) {
             e.printStackTrace();
         }
