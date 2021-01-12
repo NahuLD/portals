@@ -10,7 +10,7 @@ configure<JavaPluginConvention> {
 }
 
 group = "me.nahu.portals"
-version = "0.1.0"
+version = "0.1.1"
 
 repositories {
     maven {
@@ -76,6 +76,7 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
 bukkit {
     name = "Portals"
     description = "Very nice portals plugin!"
+    version = "v${project.version}"
     main = "me.nahu.portals.PortalsPlugin"
     authors = listOf("NahuLD")
     depend = listOf("WorldEdit")
