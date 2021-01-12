@@ -37,15 +37,17 @@ public class PortalsPlugin extends JavaPlugin {
 
         commandManager = new BukkitCommandManager(this);
         commandManager.getCommandCompletions().registerAsyncCompletion(
-                "portals",
-                context -> portalsManager.getPortals().stream()
-                        .map(Portal::getName)
-                        .filter(name -> name.startsWith(context.getInput()))
-                        .collect(Collectors.toSet())
+            "portals",
+            context -> portalsManager.getPortals().stream()
+                .map(Portal::getName)
+                .collect(Collectors.toSet())
         );
 
         commandManager.registerCommand(new PortalCommand(portalsManager, worldEditPlugin, getConfig()));
-        getServer().getPluginManager().registerEvents(new PlayerListener(portalsManager), this);
+        getServer().getPluginManager().registerEvents(
+            new PlayerListener(portalsManager, getConfig().getInt("portal-invokation-delay", 0)),
+            this
+        );
     }
 
     @Override

@@ -1,3 +1,6 @@
+# The cool-down it'll take to execute the command once a player gets into the portal. Time is in seconds.
+portal-invokation-delay: 5
+
 # Message sent when no portal was found with the user input.
 no-portal-found: 'No portal found with that name!'
 
@@ -13,4 +16,4 @@ updated-portal: '&green&Successfully updated portal: &yellow&%portal_name%'
 # Portals list message! You may add as many messages as you want to the header, but the listing format must ALWAYS be the last message.
 portals-list:
   - '[All Portals List](yellow bold)'
-  - '&gray&- Portal [%portal_name%](color=blue suggest_command=/portal edit %portal_name% show_text=Click to edit!) &dark_gray&(&aqua&&%max_point% &dark_gray&- &dark_aqua&%min_point%&dark_gray&)'
+  - '&gray&- Portal [%portal_name%](color=blue suggest_command=/portal edit %portal_name% show_text=Click to edit!) &dark_gray&(&aqua&%max_point% &dark_gray&- &dark_aqua&%min_point%&dark_gray&)'

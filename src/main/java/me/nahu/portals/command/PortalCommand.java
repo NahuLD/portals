@@ -5,6 +5,7 @@ import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Subcommand;
+import com.google.common.collect.Lists;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 import de.themoep.minedown.MineDown;
@@ -17,6 +18,8 @@ import me.tom.sparse.spigot.chat.menu.element.ButtonElement;
 import me.tom.sparse.spigot.chat.menu.element.InputElement;
 import me.tom.sparse.spigot.chat.menu.element.TextElement;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
@@ -83,7 +86,7 @@ public class PortalCommand extends BaseCommand {
     ) {
         Optional<Portal> found = portalsManager.getPortalById(id);
         if (!found.isPresent()) {
-            commandSender.sendMessage(MineDown.stringify(MineDown.parse(this.noPortalFound)));
+            commandSender.sendMessage(TextComponent.toLegacyText(MineDown.parse(this.noPortalFound)));
             return;
         }
         Portal portal = found.get();
@@ -92,7 +95,7 @@ public class PortalCommand extends BaseCommand {
         portalsManager.savePortal(portal);
 
         commandSender.sendMessage(
-                MineDown.stringify(MineDown.parse(this.portalUpdated, "portal_name", portal.getName()))
+                TextComponent.toLegacyText(MineDown.parse(this.portalUpdated, "portal_name", portal.getName()))
         );
     }
 
@@ -146,19 +149,22 @@ public class PortalCommand extends BaseCommand {
 
     @Default
     @Subcommand("list")
-    public void list(@NotNull Player player) {
+    public void list(@NotNull CommandSender sender) {
+        List<BaseComponent[]> messages = Lists.newArrayList();
         if (portalList.size() > 1) {
-            portalList.subList(0, portalList.size() - 2)
-                .forEach(header -> player.spigot().sendMessage(MineDown.parse(header)));
+            portalList.subList(0, portalList.size() - 1).stream().map(MineDown::parse).forEach(messages::add);
         }
         String portalMessage = portalList.get(portalList.size() - 1);
-        portalsManager.getPortals().forEach(portal -> player.spigot().sendMessage(
+        portalsManager.getPortals().stream().map(portal ->
             MineDown.parse(portalMessage,
                 "portal_name", portal.getName(),
                 "max_point", portal.getMaxPoint().toString(),
                 "min_point", portal.getMinPoint().toString()
             )
-        ));
+        ).forEach(messages::add);
+
+        if (sender instanceof Player) messages.forEach(((Player) sender).spigot()::sendMessage);
+        else messages.stream().map(TextComponent::toLegacyText).forEach(sender::sendMessage);
     }
 
     @Nullable

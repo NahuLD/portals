@@ -148,11 +148,11 @@ public final class BasicPortal implements Portal {
         if (world == null) {
             throw new IllegalArgumentException("unknown world");
         }
-        String id = (String) args.get("id");
+        String name = (String) args.get("name");
         String command = (String) args.get("command");
         Vector max = (Vector) args.get("max");
         Vector min = (Vector) args.get("min");
         boolean consolesender = (boolean) args.get("console-sender");
-        return new BasicPortal(id, world, max, min, (command != null && command.equals("none")) ? null : command, consolesender);
+        return new BasicPortal(name, world, max, min, (command != null && command.equals("none")) ? null : command, consolesender);
     }
 }

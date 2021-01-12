@@ -68,15 +68,15 @@ tasks.withType<JavaCompile> {
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     arrayOf(
         "co.aikar.commands",
-        "me.tom.sparse.spigot.chat.menu",
+        "co.aikar.locales",
+        "me.tom.sparse.spigot.chat",
         "de.themoep.minedown"
-    ).forEach { relocate(it, "$group.shadow.$it") }
+    ).forEach { relocate(it, "${project.group}.shadow.$it") }
 }
 
 bukkit {
     name = "Portals"
     description = "Very nice portals plugin!"
-    version = "v${project.version}"
     main = "me.nahu.portals.PortalsPlugin"
     authors = listOf("NahuLD")
     depend = listOf("WorldEdit")
