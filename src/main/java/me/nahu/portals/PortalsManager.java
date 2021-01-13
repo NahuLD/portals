@@ -44,7 +44,7 @@ public final class PortalsManager implements PortalsLibrary {
     }
 
     @Override
-    public Optional<Portal> getPortalById(@NotNull String id) {
+    public Optional<Portal> getPortalByName(@NotNull String id) {
         return Optional.ofNullable(portals.get(id));
     }
 

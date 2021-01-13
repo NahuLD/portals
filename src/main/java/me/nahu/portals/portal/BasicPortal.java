@@ -118,7 +118,7 @@ public final class BasicPortal implements Portal {
     }
 
     @Override
-    public void setCommand(@NotNull String command) {
+    public void setCommand(@Nullable String command) {
         this.command = command;
     }
 

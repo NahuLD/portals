@@ -11,13 +11,11 @@ import com.sk89q.worldedit.bukkit.selections.Selection;
 import de.themoep.minedown.MineDown;
 import me.nahu.portals.PortalsManager;
 import me.nahu.portals.api.entities.Portal;
+import me.nahu.portals.chatmenu.ButtonElement;
 import me.nahu.portals.utils.Pair;
 import me.tom.sparse.spigot.chat.menu.ChatMenu;
-import me.tom.sparse.spigot.chat.menu.element.BooleanElement;
-import me.tom.sparse.spigot.chat.menu.element.ButtonElement;
 import me.tom.sparse.spigot.chat.menu.element.InputElement;
 import me.tom.sparse.spigot.chat.menu.element.TextElement;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.CommandSender;
@@ -29,14 +27,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static co.aikar.commands.ACFBukkitUtil.color;
 
 @CommandAlias("portals|portal")
 public class PortalCommand extends BaseCommand {
+    private static final String BORDER = color("&8&l&m----------------------------------------");
+
     private final PortalsManager portalsManager;
     private final WorldEditPlugin worldEditPlugin;
 
     private final String noPortalFound;
     private final String noSelections;
+    private final String alreadyExists;
     private final String portalCreated;
     private final String portalUpdated;
     private final List<String> portalList;
@@ -51,19 +56,25 @@ public class PortalCommand extends BaseCommand {
 
         this.noPortalFound = configuration.getString("no-portal-found", "N/A");
         this.noSelections = configuration.getString("no-selections", "N/A");
+        this.alreadyExists = configuration.getString("already-exists", "N/A");
         this.portalCreated = configuration.getString("created-portal", "N/A");
         this.portalUpdated = configuration.getString("updated-portal", "N/A");
         this.portalList = configuration.getStringList("portals-list");
     }
 
     @Subcommand("create")
-    @CommandCompletion("Name!")
+    @CommandCompletion("Name! true|false Command!")
     public void create(
             @NotNull Player player,
             @NotNull String name,
-            @co.aikar.commands.annotation.Optional Boolean consoleRun, // we have to use this sadly
-            @co.aikar.commands.annotation.Optional String[] command
+            @co.aikar.commands.annotation.Optional @Nullable Boolean consoleRun, // we have to use this sadly
+            @co.aikar.commands.annotation.Optional @Nullable String[] command
     ) {
+        if (portalsManager.getPortalByName(name).isPresent()) {
+            player.spigot().sendMessage(MineDown.parse(this.alreadyExists));
+            return;
+        }
+
         Pair<Vector, Vector> selections = getSelections(player);
         if (selections == null) return;
 
@@ -77,14 +88,14 @@ public class PortalCommand extends BaseCommand {
     }
 
     @Subcommand("consoleedit|ce")
-    @CommandCompletion("@portals true|false")
+    @CommandCompletion("@portals true|false Command!")
     public void edit(
             @NotNull CommandSender commandSender,
-            @NotNull String id,
-            @co.aikar.commands.annotation.Optional Boolean consoleCommand,
+            @NotNull String name,
+            @co.aikar.commands.annotation.Optional @Nullable Boolean consoleCommand,
             @co.aikar.commands.annotation.Optional @Nullable String[] command
     ) {
-        Optional<Portal> found = portalsManager.getPortalById(id);
+        Optional<Portal> found = portalsManager.getPortalByName(name);
         if (!found.isPresent()) {
             commandSender.sendMessage(TextComponent.toLegacyText(MineDown.parse(this.noPortalFound)));
             return;
@@ -99,51 +110,71 @@ public class PortalCommand extends BaseCommand {
         );
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Subcommand("edit")
     @CommandCompletion("@portals")
     public void edit(@NotNull Player player, @NotNull String id) {
-        Optional<Portal> found = portalsManager.getPortalById(id);
+        Optional<Portal> found = portalsManager.getPortalByName(id);
         if (!found.isPresent()) {
             player.spigot().sendMessage(MineDown.parse(this.noPortalFound));
             return;
         }
         Portal portal = found.get();
+
+        AtomicBoolean consoleSent = new AtomicBoolean(portal.isConsoleCommand());
+        AtomicReference<Pair<Vector, Vector>> selections = new AtomicReference<>(Pair.of(portal.getMaxPoint(), portal.getMinPoint()));
+
         ChatMenu editMenu = new ChatMenu().pauseChat();
 
-        // HEADER
-        editMenu.add(new TextElement(ChatColor.YELLOW + "Editing menu for Portal " + ChatColor.RED + portal.getName(), 5, 8));
+        editMenu.add(new TextElement(BORDER, 0, 11));
+        editMenu.add(new TextElement(color("&5" + portal.getName() + " Portal"), 5, 12));
 
-        // AVAILABLE TOGGLE
-        editMenu.add(new TextElement("Is sent by console? ", 5, 10));
-        BooleanElement consoleCommand = editMenu.add(new BooleanElement(5, 11, portal.isConsoleCommand()));
-
-        // BOUNDARIES UPDATE
-        editMenu.add(new TextElement(
-                "Boundaries: " + ChatColor.YELLOW + "(" + portal.getMaxPoint().toString() + " - " + portal.getMinPoint().toString() + ")",
-                5,
-                13
-        ));
-        editMenu.add(new ButtonElement(5, 14, ChatColor.AQUA + "Update to latest Selection", clicker -> {
-            Pair<Vector, Vector> selections = getSelections(player);
-            if (selections == null) return;
-            portal.setMaxPoint(selections.getLeft()); // max
-            portal.setMinPoint(selections.getRight()); // min
-        }));
-
-        // COMMAND UPDATE
-        editMenu.add(new TextElement("Command: ", 5, 16));
-        InputElement command = editMenu.add(new InputElement(5, 17, 250, portal.getCommand().orElse("None")));
-
-        editMenu.add(new ButtonElement(5, 19, ChatColor.GREEN + "[Update Portal]", clicker -> {
-            portal.setConsoleCommand(consoleCommand.getValue());
-            if (command.getValue() != null && !command.getValue().equals("None")) {
-                portal.setCommand(command.getValue());
+        ButtonElement consoleSentButton = new ButtonElement(
+            5,
+            14,
+            color("&dConsole&7: " + ((consoleSent.get()) ? "&aTrue" : "&cFalse") + " &8[&bUpdate&8]"),
+            (clicker, button) -> {
+                consoleSent.set(!consoleSent.get());
+                button.setText(color("&dConsole&7: " + ((consoleSent.get()) ? "&aTrue" : "&cFalse") + " &8[&bUpdate&8]"));
             }
+        );
 
-            player.spigot().sendMessage(MineDown.parse(this.portalUpdated, "portal_name", portal.getName()));
-            portalsManager.savePortal(portal);
-            editMenu.close(clicker);
-        }));
+        editMenu.add(consoleSentButton);
+
+        ButtonElement regionButton = new ButtonElement(
+            5,
+            15,
+            color("&dRegion&7: &8(&a" + selections.get().getLeft().toString() + "&8 - &a" + selections.get().getRight().toString() + "&8) [&bUpdate&8]"),
+            (clicker, button) -> {
+                Pair<Vector, Vector> selection = getSelections(clicker);
+                if (selection != null) selections.set(selection);
+                button.setText(
+                    color("&dRegion&7: &8(&a" + selections.get().getLeft().toString() + "&8 - &a" + selections.get().getRight().toString() + "&8) [&bUpdate&8]")
+                );
+            }
+        );
+        editMenu.add(regionButton);
+
+        editMenu.add(new TextElement(color("&dCommand&7:"), 5, 16));
+        InputElement command = editMenu.add(new InputElement(50, 16, 200, portal.getCommand().orElse(null)));
+
+        ButtonElement saveChangesButton = new ButtonElement(
+            5,
+            18,
+            color("&8[&eSave Changes&8]"),
+            (clicker, button) -> {
+                portal.setConsoleCommand(consoleSent.get());
+                portal.setMaxPoint(selections.get().getLeft());
+                portal.setMinPoint(selections.get().getRight());
+                portal.setCommand(command.getValue());
+                portalsManager.savePortal(portal);
+                player.spigot().sendMessage(MineDown.parse(this.portalUpdated, "portal_name", portal.getName()));
+                editMenu.close(clicker);
+            }
+        );
+        editMenu.add(saveChangesButton);
+        editMenu.add(new TextElement(BORDER, 0,19));
+
         editMenu.openFor(player);
     }
 

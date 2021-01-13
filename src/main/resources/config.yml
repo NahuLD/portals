@@ -7,6 +7,8 @@ no-portal-found: 'No portal found with that name!'
 # Message sent when selections are needed but none are found.
 no-selections: '&red&No WorldEdit selections available!'
 
+already-exists: '&red&A portal with that name already exists! Try a new one.'
+
 # Message sent when a portal has been created.
 created-portal: '&green&Successfully created portal with name: [%portal_name%](color=yellow suggest_command=/portal edit %portal_name% show_text=Click to edit!)'
 

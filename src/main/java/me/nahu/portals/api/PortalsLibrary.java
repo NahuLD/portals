@@ -36,7 +36,7 @@ public interface PortalsLibrary {
      * @param id Id to look for.
      * @return Optional with the portal, empty if none are found.
      */
-    Optional<Portal> getPortalById(@NotNull String id);
+    Optional<Portal> getPortalByName(@NotNull String id);
 
     /**
      * Get all portals.

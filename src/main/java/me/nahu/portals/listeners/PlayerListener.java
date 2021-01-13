@@ -29,19 +29,13 @@ public class PlayerListener implements Listener {
             return;
         }
 
-        if (event.getFrom().getBlockX() == event.getTo().getBlockX() &&
-            event.getFrom().getBlockY() == event.getTo().getBlockY() &&
-            event.getFrom().getBlockZ() == event.getTo().getBlockZ()) {
-            return;
-        }
-
         Player player = event.getPlayer();
+
+        UUID uniqueId = player.getUniqueId();
+        if (cooldown.contains(uniqueId)) return;
+
         portalsLibrary.getPortalAt(player.getLocation()).ifPresent(portal -> {
-            UUID uniqueId = player.getUniqueId();
-            if (cooldown.contains(uniqueId)) return;
-
             portal.invokeCommand(player);
-
             cooldown.add(uniqueId);
             Utilities.runDelayedTask(() -> cooldown.remove(uniqueId), portalDelay * 20);
         });

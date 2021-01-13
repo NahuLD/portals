@@ -6,6 +6,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -98,7 +99,7 @@ public interface Portal extends ConfigurationSerializable {
      * Change the command that is run. Placeholder is %player%, which will replace the player name with.
      * @param command New command.
      */
-    void setCommand(@NotNull String command);
+    void setCommand(@Nullable String command);
 
     /**
      * Invoke the command above onto a certain player.
@@ -130,11 +131,11 @@ public interface Portal extends ConfigurationSerializable {
      * @return {@link Boolean} whether it's inside of the portal boundaries.
      */
     default boolean isInside(@NotNull Vector vector) {
-        return vector.getBlockX() >= getMinPoint().getBlockX() &&
-                vector.getBlockX() <= getMaxPoint().getBlockX() &&
-                vector.getBlockY() >= getMinPoint().getBlockY() &&
-                vector.getBlockY() <= getMaxPoint().getBlockY() &&
-                vector.getBlockZ() >= getMinPoint().getBlockZ() &&
-                vector.getBlockZ() <= getMaxPoint().getBlockZ();
+        return vector.getBlockX() >= getMinPoint().getX() &&
+                vector.getBlockX() <= getMaxPoint().getX() &&
+                vector.getBlockY() >= getMinPoint().getY() &&
+                vector.getBlockY() <= getMaxPoint().getY() &&
+                vector.getBlockZ() >= getMinPoint().getZ() &&
+                vector.getBlockZ() <= getMaxPoint().getZ();
     }
 }
