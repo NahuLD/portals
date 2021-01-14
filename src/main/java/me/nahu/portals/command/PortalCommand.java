@@ -1,10 +1,7 @@
 package me.nahu.portals.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.*;
 import com.google.common.collect.Lists;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
@@ -33,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static co.aikar.commands.ACFBukkitUtil.color;
 
 @CommandAlias("portals|portal")
+@CommandPermission("portals.*")
 public class PortalCommand extends BaseCommand {
     private static final String BORDER = color("&8&l&m----------------------------------------");
 
@@ -64,6 +62,7 @@ public class PortalCommand extends BaseCommand {
 
     @Subcommand("create")
     @CommandCompletion("Name! true|false Command!")
+    @CommandPermission("portals.create")
     public void create(
             @NotNull Player player,
             @NotNull String name,
@@ -89,6 +88,7 @@ public class PortalCommand extends BaseCommand {
 
     @Subcommand("edit")
     @CommandCompletion("@portals true|false Command!")
+    @CommandPermission("portals.edit")
     public void edit(
             @NotNull CommandSender commandSender,
             @NotNull String name,
@@ -113,6 +113,7 @@ public class PortalCommand extends BaseCommand {
     @SuppressWarnings("ConstantConditions")
     @Subcommand("info|menu")
     @CommandCompletion("@portals")
+    @CommandPermission("portals.info")
     public void edit(@NotNull Player player, @NotNull String id) {
         Optional<Portal> found = portalsManager.getPortalByName(id);
         if (!found.isPresent()) {
@@ -180,6 +181,7 @@ public class PortalCommand extends BaseCommand {
 
     @Default
     @Subcommand("list")
+    @CommandPermission("portals.list")
     public void list(@NotNull CommandSender sender) {
         List<BaseComponent[]> messages = Lists.newArrayList();
         if (portalList.size() > 1) {
