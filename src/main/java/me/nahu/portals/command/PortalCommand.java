@@ -87,7 +87,7 @@ public class PortalCommand extends BaseCommand {
         );
     }
 
-    @Subcommand("consoleedit|ce")
+    @Subcommand("edit")
     @CommandCompletion("@portals true|false Command!")
     public void edit(
             @NotNull CommandSender commandSender,
@@ -111,7 +111,7 @@ public class PortalCommand extends BaseCommand {
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Subcommand("edit")
+    @Subcommand("info|menu")
     @CommandCompletion("@portals")
     public void edit(@NotNull Player player, @NotNull String id) {
         Optional<Portal> found = portalsManager.getPortalByName(id);
