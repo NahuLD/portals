@@ -10,7 +10,7 @@ configure<JavaPluginConvention> {
 }
 
 group = "me.nahu.portals"
-version = "0.1.4"
+version = "0.1.5"
 
 repositories {
     maven {
@@ -57,7 +57,7 @@ dependencies {
     compileOnly("org.jetbrains:annotations:20.1.0")
     compileOnly("com.sk89q.worldedit:worldedit-bukkit:6.1.5")
     implementation("co.aikar:acf-bukkit:0.5.0-SNAPSHOT")
-    implementation("me.tom.sparse:ChatMenuAPI:1.1.2_jdk8_spgt1.8.8")
+    implementation("me.tom.sparse:ChatMenuAPI:1.1.3_jdk8_spgt1.8.8")
     implementation("de.themoep:minedown:1.6.2-SNAPSHOT")
 }
 
